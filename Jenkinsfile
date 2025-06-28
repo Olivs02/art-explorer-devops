@@ -1,22 +1,16 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.10-slim'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
 
     stages {
-        stage('Cloner le dépôt') {
-            steps {
-                git branch: 'main', url: 'https://github.com/Olivs02/art-explorer-devops.git'
-            }
-        }
-
-        stage('Installer Python') {
-            steps {
-                sh 'apt-get update && apt-get install -y python3 python3-pip'
-            }
-        }
-
         stage('Tests unitaires') {
             steps {
-                sh 'python3 -m unittest discover tests'
+                sh 'pip install -r requirements.txt'
+                sh 'python -m unittest discover tests'
             }
         }
 
