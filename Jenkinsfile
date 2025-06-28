@@ -1,5 +1,9 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.10'
+        }
+    }
 
     environment {
         PYTHONUNBUFFERED = 1
@@ -21,7 +25,7 @@ pipeline {
 
     post {
         failure {
-            echo "Build échoué – tests unitaires"
+            echo "Build échoué – tests unitaires"
         }
     }
 }
