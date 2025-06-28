@@ -117,3 +117,6 @@ class TestArtGalleryApp(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main() 
+
+def test_fail_on_purpose():
+    assert 1 == 0  # toujours faux
