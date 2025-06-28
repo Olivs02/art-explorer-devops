@@ -8,11 +8,17 @@ pipeline {
             }
         }
 
-        stage('Tests unitaires') {
+        stage('Install Python') {
             steps {
-                sh 'python -m unittest discover tests'
+                sh 'apt-get update && apt-get install -y python3 python3-pip'
             }
         }
+    }
+    stage('Tests unitaires') {
+        steps {
+            sh 'python3 -m unittest discover tests'
+        }
+}
 
         stage('Build Docker') {
             steps {
@@ -20,4 +26,3 @@ pipeline {
             }
         }
     }
-}
