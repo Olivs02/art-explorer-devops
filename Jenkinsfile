@@ -1,24 +1,27 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.10'
-        }
-    }
+    agent any
 
     environment {
         PYTHONUNBUFFERED = 1
     }
 
     stages {
-        stage('Install dependencies') {
+        stage('Setup Python Env') {
             steps {
-                sh 'pip install -r requirements.txt'
+                sh '''
+                    python3 -m venv venv
+                    . venv/bin/activate
+                    pip install -r requirements.txt
+                '''
             }
         }
 
         stage('Run unit tests') {
             steps {
-                sh 'pytest tests/ || exit 1'
+                sh '''
+                    . venv/bin/activate
+                    pytest tests/ || exit 1
+                '''
             }
         }
     }
