@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Cloner le dépôt') {
             steps {
-                git 'https://github.com/Olivs02/art-explorer-devops.git'
+                git branch: 'main', url: 'https://github.com/Olivs02/art-explorer-devops.git'
             }
         }
 
