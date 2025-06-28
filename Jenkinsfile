@@ -25,7 +25,7 @@ pipeline {
 
     post {
         failure {
-            script {
+            node {
                 sh '''
                     curl -H "Content-Type: application/json" \
                     -d '{"text": "Le build de *${JOB_NAME}* #${BUILD_NUMBER} a échoué. Voir : ${BUILD_URL}"}' \
