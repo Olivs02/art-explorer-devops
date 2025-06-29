@@ -31,3 +31,10 @@ pipeline {
         }
     }
 }
+stage('Deploy to VM') {
+    steps {
+        sshagent(['vm-ssh-key']) {
+            sh 'scp -o StrictHostKeyChecking=no -r * jenkins@192.168.100.170:/home/jenkins/app'
+        }
+    }
+}
