@@ -1,15 +1,20 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.10-slim'
-        }
-    }
+    agent any
 
     environment {
         PYTHONUNBUFFERED = 1
     }
 
     stages {
+        stage('Install Python & pip') {
+            steps {
+                sh '''
+                    apt-get update
+                    apt-get install -y python3 python3-pip python3-venv
+                '''
+            }
+        }
+
         stage('Install dependencies') {
             steps {
                 sh 'python3 -m venv venv && . venv/bin/activate && pip install -r requirements.txt'
