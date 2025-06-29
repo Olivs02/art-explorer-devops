@@ -1,5 +1,9 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.10-slim'
+        }
+    }
 
     environment {
         PYTHONUNBUFFERED = 1
@@ -21,15 +25,7 @@ pipeline {
         stage('Deploy to VM') {
             steps {
                 sshagent(['vm-ssh-key']) {
-                    sh '''
-                        ssh -o StrictHostKeyChecking=no jenkins@192.168.100.170 "rm -rf ~/app && mkdir -p ~/app"
-                        scp -o StrictHostKeyChecking=no -r * jenkins@192.168.100.170:~/app
-                        ssh -o StrictHostKeyChecking=no jenkins@192.168.100.170 << EOF
-                        cd ~/app
-                        pip3 install --user -r requirements.txt
-                        nohup python3 wsgi.py > app.log 2>&1 &
-                        EOF
-                    '''
+                    sh 'scp -o StrictHostKeyChecking=no -r * jenkins@192.168.100.170:/home/jenkins/app'
                 }
             }
         }
