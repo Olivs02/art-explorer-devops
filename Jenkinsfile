@@ -1,5 +1,9 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.10-slim'
+        }
+    }
 
     environment {
         PYTHONUNBUFFERED = 1
@@ -8,10 +12,7 @@ pipeline {
     stages {
         stage('Install Python & pip') {
             steps {
-                sh '''
-                    apt-get update
-                    apt-get install -y python3 python3-pip python3-venv
-                '''
+                sh 'apt-get update && apt-get install -y python3 python3-pip python3-venv'
             }
         }
 
@@ -30,7 +31,23 @@ pipeline {
         stage('Deploy to VM') {
             steps {
                 sshagent(['vm-ssh-key']) {
-                    sh 'scp -o StrictHostKeyChecking=no -r * jenkins@192.168.100.170:/home/jenkins/app'
+                    sh '''
+                    # Créer le dossier app s'il n'existe pas
+                    ssh -o StrictHostKeyChecking=no jenkins@192.168.100.170 'mkdir -p /home/jenkins/app'
+
+                    # Transférer les fichiers (mais pas le venv !)
+                    scp -o StrictHostKeyChecking=no -r \
+                    Dockerfile Jenkinsfile README.md app app.py requirements.txt tests version.txt wsgi.py \
+                    jenkins@192.168.100.170:/home/jenkins/app
+
+                    # Exécuter les commandes de déploiement sur la VM
+                    ssh -o StrictHostKeyChecking=no jenkins@192.168.100.170 << EOF
+cd /home/jenkins/app
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+EOF
+                    '''
                 }
             }
         }
