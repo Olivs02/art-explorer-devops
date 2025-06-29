@@ -17,6 +17,22 @@ pipeline {
                 sh '. venv/bin/activate && pytest tests/ || exit 1'
             }
         }
+
+        stage('Deploy to VM') {
+            steps {
+                sshagent(['vm-ssh-key']) {
+                    sh '''
+                        ssh -o StrictHostKeyChecking=no jenkins@192.168.100.170 "rm -rf ~/app && mkdir -p ~/app"
+                        scp -o StrictHostKeyChecking=no -r * jenkins@192.168.100.170:~/app
+                        ssh -o StrictHostKeyChecking=no jenkins@192.168.100.170 << EOF
+                        cd ~/app
+                        pip3 install --user -r requirements.txt
+                        nohup python3 wsgi.py > app.log 2>&1 &
+                        EOF
+                    '''
+                }
+            }
+        }
     }
 
     post {
@@ -28,13 +44,6 @@ pipeline {
                     https://reseauges75.webhook.office.com/webhookb2/a7ec4924-60f8-454b-8355-032da4999b0c@c371d4f5-b34f-4b06-9e66-517fed904220/IncomingWebhook/bfe38787b50f41d485857924c0e091ce/e49d4ff7-bcd8-48f9-8d04-ba8395809771/V2DkMfHfjx7yjGuWHDh2uW5XhZhj0lhlNMLV2LX7s5lHY1
                 """
             }
-        }
-    }
-}
-stage('Deploy to VM') {
-    steps {
-        sshagent(['vm-ssh-key']) {
-            sh 'scp -o StrictHostKeyChecking=no -r * jenkins@192.168.100.170:/home/jenkins/app'
         }
     }
 }
